@@ -9,8 +9,6 @@ import os
 from tqdm import tqdm
 import time
 
-from requests.api import request
-
 def download_novel():
     start_time = time.time()
     dir_name = os.path.abspath("novel")
