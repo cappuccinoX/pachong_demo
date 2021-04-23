@@ -52,7 +52,7 @@ def save_excel(data):
     sheet1 = workbook.add_worksheet("即将上映的电影")
 
     t_prpos = title_prpos()
-    sheet1.write_merge(0, 0, 0, 8, t_prpos["msg"], style = t_prpos["style"])
+    sheet1.merge_range(0, 0, 0, 8, t_prpos["msg"])
 
     col = ("上映时间", "电影名称", "类型", "国家/地区", "想看", "详情链接")
 
@@ -63,20 +63,10 @@ def save_excel(data):
         for idx, content in enumerate(row):
             sheet1.write(row_no + 2, idx, content)
 
-    workbook.save(f"{dir_name}/即将上映的电影.xls")
+    workbook.close()
 
 def title_prpos():
-    style = xlwt.XFStyle()
-    al = xlwt.Alignment()
-    al.horz = 0x02 # 水平居中
-    al.vert = 0x02 # 垂直居中
-    style.alignment = al
-
-    font = xlwt.Font()
-    font.bold = True # 字体加粗
-    font.height = 20*14 # 字体大小，18为字号，20为衡量单位
-    style.font = font
-
+    style = {'align': 'center', 'valign': 'vcenter'}
     title = str(datetime.today()).split(' ')[0]
     title = f"统计日期: {title}"
     return {"msg": title, "style": style}
@@ -95,22 +85,22 @@ from urllib.request import urlopen
 import PIL.Image as im
 
 if __name__ == "__main__":
-    # top_movie()
+    top_movie()
     # save_excel([])
-    headers = {
-        "User-Agent": random.choice(user_agents_pool)
-    }
-    r = requests.get("https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2640236255.webp", headers = headers)
-    urlretrieve("https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2640236255.webp", "aa.png")
+    # headers = {
+    #     "User-Agent": random.choice(user_agents_pool)
+    # }
+    # r = requests.get("https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2640236255.webp", headers = headers)
+    # urlretrieve("https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2640236255.webp", "aa.png")
 
-    workbook = xlsxwriter.Workbook('images.xlsx')
-    worksheet = workbook.add_worksheet()
+    # workbook = xlsxwriter.Workbook('images.xlsx')
+    # worksheet = workbook.add_worksheet()
     
-    a=im.open("aa.png")
-    a.save("jj.png")
+    # a=im.open("aa.png")
+    # a.save("jj.png")
     # https://blog.csdn.net/AuserBB/article/details/79259328 xlsxwriter 插入图片
     # https://www.jianshu.com/p/c87edf948658 xlsxwriter 常用方法
-    worksheet.insert_image(0, 0, 'jj.png', {'x_offset': 0, 'y_offset': 0, 'x_scale': 0.3, 'y_scale': 0.3})
-    workbook.close()
+    # worksheet.insert_image(0, 0, 'jj.png', {'x_offset': 0, 'y_offset': 0, 'x_scale': 0.3, 'y_scale': 0.3})
+    # workbook.close()
 
     
