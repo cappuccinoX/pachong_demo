@@ -1,11 +1,15 @@
 import requests
 import random
 from bs4 import BeautifulSoup
-import xlwt
 import os
 from datetime import datetime
 from urllib.request import urlretrieve
 import xlsxwriter
+from io import BytesIO
+from urllib.request import urlopen
+import PIL.Image as im
+from tqdm import tqdm
+
 
 # 伪装请求
 user_agents_pool = [
@@ -28,7 +32,8 @@ def top_movie():
     html = bs.find("div", attrs = {"class": "article"}).find("tbody")
     rows = html.find_all("tr")
     movies = list()
-    for row in rows:
+    print("获取电影信息")
+    for row in tqdm(rows):
         cells = row.find_all("td")
         movie_info = list()
         # 上映时间
@@ -42,65 +47,91 @@ def top_movie():
         # 热度
         movie_info.append(cells[4].text.strip())
         # 电影详情链接
-        movie_info.append(cells[1].find("a").get("href"))
+        details_link = cells[1].find("a").get("href")
+        movie_info.append(details_link)
+        details = movie_details(details_link)
+        # 主演
+        movie_info.append(details["starring"])
+        # 海报信息
+        movie_info.append({"image_url": details["image_url"]})
         movies.append(movie_info)
+    print("电影信息获取完成")
     save_excel(movies)
 
+def movie_details(details_link):
+    try:
+        details = {}
+        r = requests.get(details_link, headers = {
+            "User-Agent": random.choice(user_agents_pool)
+        })
+        bs = BeautifulSoup(r.text, "lxml")
+        # 海报
+        img = bs.find("a", attrs = {"class": "nbgnbg"}).find("img")
+        img_link = img.get("src")
+        # 主演
+        starring = bs.find("span", attrs = {"class": "actor"})
+        if starring is not None:
+            starring = bs.find("span", attrs = {"class": "attrs"}).text
+        else:
+            starring = "暂无主演信息"
+        details["image_url"] = img_link
+        details["starring"] = starring
+        return details
+    except Exception as e:
+        print(f"获取详情报错: {e}, 详情链接: {details_link}")
+
 def save_excel(data):
-    dir_name = os.path.abspath("douban")
-    workbook = xlsxwriter.Workbook(f"{dir_name}/即将上映的电影.xls")
-    sheet1 = workbook.add_worksheet("即将上映的电影")
+    try:
+        print("开始写入excel")
+        dir_name = os.path.abspath("douban")
+        workbook = xlsxwriter.Workbook(
+            filename = f"{dir_name}/即将上映的电影.xlsx",
+            options = {
+                'default_format_properties': {
+                    "font_size": 20,
+                    "text_wrap": True, # 单元格自动换行
+                    "align": "center",
+                    "valign": "vcenter"
+                }
+            }
+        )
+        sheet1 = workbook.add_worksheet("即将上映的电影")
+        col = ("上映时间", "电影名称", "类型", "国家/地区", "想看", "详情链接", "主演", "海报")
+        sheet1.set_column(0, len(col) - 1, 25)
 
-    t_prpos = title_prpos()
-    sheet1.merge_range(0, 0, 0, 8, t_prpos["msg"])
+        title = str(datetime.today()).split(' ')[0]
+        title = f"统计日期: {title}"
+        sheet1.merge_range(0, 0, 0, 7, title)
 
-    col = ("上映时间", "电影名称", "类型", "国家/地区", "想看", "详情链接")
+        for idx, name in enumerate(col):
+            sheet1.set_row(idx, 100)
+            sheet1.write(1, idx, name)
 
-    for idx, name in enumerate(col):
-        sheet1.write(1, idx, name)
+        for row_no, row in tqdm(enumerate(data)):
+            for idx, content in enumerate(row):
+                sheet1.set_row(row_no + 2, 100)
+                if idx == len(row) - 1:
+                    sheet1.insert_image(
+                        row_no + 2,
+                        idx,
+                        content["image_url"],
+                        {
+                            "image_data": BytesIO(urlopen(content["image_url"]).read()),
+                            "x_offset": 0,
+                            "y_offset": 0,
+                            "x_scale": 0.3, # 水平缩放
+                            "y_scale": 0.3, # 垂直缩放
+                        }
+                    )
+                else:
+                    sheet1.write(row_no + 2, idx, content)
 
-    for row_no, row in enumerate(data):
-        for idx, content in enumerate(row):
-            sheet1.write(row_no + 2, idx, content)
+        workbook.close()
+        print("excel写入完成")
+    except Exception as e:
+        print(f"生成excel报错: {e}")
+        
 
-    workbook.close()
-
-def title_prpos():
-    style = {'align': 'center', 'valign': 'vcenter'}
-    title = str(datetime.today()).split(' ')[0]
-    title = f"统计日期: {title}"
-    return {"msg": title, "style": style}
-    
-
-def get_movie_details(url):
-    headers = {
-        "User-Agent": random.choice(user_agents_pool)
-    }
-    r = requests.get(url, headers = headers)
-    bs = BeautifulSoup(r.text, "lxml")
-    
-
-from io import BytesIO
-from urllib.request import urlopen
-import PIL.Image as im
 
 if __name__ == "__main__":
     top_movie()
-    # save_excel([])
-    # headers = {
-    #     "User-Agent": random.choice(user_agents_pool)
-    # }
-    # r = requests.get("https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2640236255.webp", headers = headers)
-    # urlretrieve("https://img9.doubanio.com/view/photo/s_ratio_poster/public/p2640236255.webp", "aa.png")
-
-    # workbook = xlsxwriter.Workbook('images.xlsx')
-    # worksheet = workbook.add_worksheet()
-    
-    # a=im.open("aa.png")
-    # a.save("jj.png")
-    # https://blog.csdn.net/AuserBB/article/details/79259328 xlsxwriter 插入图片
-    # https://www.jianshu.com/p/c87edf948658 xlsxwriter 常用方法
-    # worksheet.insert_image(0, 0, 'jj.png', {'x_offset': 0, 'y_offset': 0, 'x_scale': 0.3, 'y_scale': 0.3})
-    # workbook.close()
-
-    
