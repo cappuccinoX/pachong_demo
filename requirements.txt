@@ -3,3 +3,4 @@ beautifulsoup4
 tqdm
 xlwt
 xlsxwriter
+matplotlib # 图表绘制
