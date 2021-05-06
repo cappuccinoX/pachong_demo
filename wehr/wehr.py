@@ -1,3 +1,6 @@
+'''
+使用脚本时，需更换exam_code 以及 headers中的Cookie
+'''
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -6,7 +9,7 @@ import re
 from tqdm import tqdm
 import random
 
-exam_code = "6ABA21DBB8234BCB7A96"
+exam_code = "99B4DB72F120E3D41003"
 user_agents_pool = [
     'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
     'Opera/9.25 (Windows NT 5.1; U; en)',
@@ -21,7 +24,7 @@ user_agents_pool = [
 # 一鱼两吃
 def yi_yu_liang_chi():
     headers = {
-        "Cookie": "visitkey=8c076168bf30eb4589117e4a4b; mcduid=170603; scode=d32b0b632eb809276ba9f22b72dab88493cc7cbe; PHPSESSID=nkqrfkoqc7774pvl1jck9s3sm3; exam_new_2094=1; new_version_online_exam_2094=1; think_language=zh-CN; exam_new_2088=1; new_version_online_exam_2088=1; exam_new_2089=1; new_version_online_exam_2089=1",
+        "Cookie": "think_language=zh-CN; visitkey=66de1372d602b5666346cd47d8; mcduid=10006; scode=ee44bc1461a60ab63ececa8ac21ca5b512dbd365; PHPSESSID=sti8jkegdtetl8sg21p94qoq51; exam_new_11896=1; new_version_online_exam_11896=1; x-host-key-front=1794061adda-4e67e7895ea85f53d5c29cfc0e9f43b2bf4456bc; x-host-key-ngn=1794061add9-d531bfa1eb390cdcd0d6ade53baad9eb7552b1d2",
         "User-Agent": random.choice(user_agents_pool)
     }
     # 获取花名册
@@ -66,6 +69,8 @@ def submit_exam(exam_links, type):
                 elif idx == 4: # 学历题
                     val["select"][0]["value"] = random.choice(["0", "1", "2", "3", "4", "5", "6"])
         elif type == "非高管":
+            # answer.json 含高管答案, 这里去掉最后5道高管题
+            answer = answer[0: -5]
             for idx, val in enumerate(answer):
                 if idx in range(5, 79):
                     val["select"][0]["value"] = random.choice(["0", "1", "2", "3", "4", "5"])
