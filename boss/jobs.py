@@ -44,6 +44,13 @@ def jobs():
             return True
         return False
 
+    '''
+    s='经验不限<a href=''></a>本科'.encode('utf-8')
+    s=s.decode('utf8')
+    m =re.findall(u"[\u4e00-\u9fa5]+",s)
+    print(m)
+    u"(\d+-\d+年)?([\u4e00-\u9fa5]+)?(<.*>)([\u4e00-\u9fa5]+)"
+    '''   
     def get_all_jobs(jobs, page_index):
         try:
             WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CLASS_NAME, "job-list")))
