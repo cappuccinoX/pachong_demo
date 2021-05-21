@@ -9,7 +9,7 @@ import re
 from tqdm import tqdm
 import random
 
-exam_code = "99B4DB72F120E3D41003"
+exam_code = "AFA801FEC16EF72FCEB4"
 user_agents_pool = [
     'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
     'Opera/9.25 (Windows NT 5.1; U; en)',
@@ -24,7 +24,7 @@ user_agents_pool = [
 # 一鱼两吃
 def yi_yu_liang_chi():
     headers = {
-        "Cookie": "think_language=zh-CN; visitkey=66de1372d602b5666346cd47d8; mcduid=10006; scode=ee44bc1461a60ab63ececa8ac21ca5b512dbd365; PHPSESSID=sti8jkegdtetl8sg21p94qoq51; exam_new_11896=1; new_version_online_exam_11896=1; x-host-key-front=1794061adda-4e67e7895ea85f53d5c29cfc0e9f43b2bf4456bc; x-host-key-ngn=1794061add9-d531bfa1eb390cdcd0d6ade53baad9eb7552b1d2",
+        "Cookie": "visitkey=4b3b1fb79ac0f63dec974ca731; x-host-key-front=1797e7ff681-8717a86a0c73215ff7c10b9cf7d96aae4f4809fe; x-host-key-ngn=1797e7ff678-3b2d81f36a3f190190ced55f58d9f1ec63406fc4; think_language=zh-CN; mcduid=10006; scode=b0c686ae2c4395313a5bc86341f1adf8d128376b; PHPSESSID=htqspi5pud62en9lj1je9nhtk2",
         "User-Agent": random.choice(user_agents_pool)
     }
     # 获取花名册
@@ -100,6 +100,7 @@ def submit_exam(exam_links, type):
     print("问卷填答完成")
 
 # 普通调研
+# unfinished
 def pt(type, loop_time):
     try:
         answer = None
